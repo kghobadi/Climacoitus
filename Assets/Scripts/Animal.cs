@@ -16,14 +16,20 @@ public class Animal : MonoBehaviour {
 
     public AnimalState animalState;
 
+    public bool alpha;
+
     Vector3 origPos, targetPos;
 
-    public float moveRadius, moveSpeed, idleTimerTotal, sexyTimeTotal, fightTimeTotal;
+    public float moveRadius, moveSpeed, idleTimerTotal, climaxTotal;
     float idleTimer, sexyTimer, fightTimer;
+
+    AudioSource myVoice;
+    public AudioClip[] sexy, fighting;
+    AudioClip sexxer, fighter;
 
     public enum AnimalState
     {
-        WALKING, SEXY, FIGHTING,
+        WALKING, SEXY, FIGHTING, DEAD
     }
     
 	void Start () {
@@ -32,6 +38,8 @@ public class Animal : MonoBehaviour {
         tpc = _player.GetComponent<ThirdPersonController>();
         rb = GetComponent<Rigidbody>();
         myCollider = GetComponent<BoxCollider>();
+
+        myVoice = GetComponent<AudioSource>();
 
         walking.SetActive(false);
         sex.SetActive(false);
@@ -42,13 +50,23 @@ public class Animal : MonoBehaviour {
         animalState = AnimalState.WALKING;
 
         idleTimer = idleTimerTotal;
-        sexyTimer = sexyTimeTotal;
-        fightTimer = fightTimeTotal;
+
+        float randomClimax = Random.Range(-climaxTotal / 2, climaxTotal / 2);
+
+        climaxTotal += randomClimax;
+
+        int RandomSex = Random.Range(0, sexy.Length);
+        int RandomFight = Random.Range(0, fighting.Length);
+
+        sexxer = sexy[RandomSex];
+        fighter = fighting[RandomFight];
     }
 	
 	void Update () {
 		if(animalState == AnimalState.WALKING)
         {
+            myVoice.Stop();
+
             if(targetPos.x < transform.position.x)
             {
                 idle.GetComponent<SpriteRenderer>().flipX = false;
@@ -89,26 +107,38 @@ public class Animal : MonoBehaviour {
         }
         else if (animalState == AnimalState.SEXY)
         {
+            if (!myVoice.isPlaying)
+            {
+                myVoice.clip = sexxer;
+                myVoice.Play();
+            }
+
             walking.SetActive(false);
             idle.SetActive(false);
             sex.SetActive(true);
             fight.SetActive(false);
 
             sexyTimer -= Time.deltaTime;
-            if(sexyTimer < 0)
+            if(sexyTimer < 0 && alpha)
             {
                 StartCoroutine(EndClimax());
             }
         }
         else if (animalState == AnimalState.FIGHTING)
         {
+            if (!myVoice.isPlaying)
+            {
+                myVoice.clip = fighter;
+                myVoice.Play();
+            }
+
             walking.SetActive(false);
             idle.SetActive(false);
             sex.SetActive(false);
             fight.SetActive(true);
 
             fightTimer -= Time.deltaTime;
-            if(fightTimer < 0)
+            if(fightTimer < 0 && alpha)
             {
                 StartCoroutine(EndClimax());
             }
@@ -117,7 +147,9 @@ public class Animal : MonoBehaviour {
 
     void FindNewPoint()
     {
-        Vector2 xy = Random.insideUnitCircle * moveRadius;
+        Vector2 myPos = new Vector2(transform.position.x, transform.position.z);
+
+        Vector2 xy = myPos + (Random.insideUnitCircle * moveRadius);
 
         targetPos = new Vector3(xy.x, origPos.y, xy.y);
     }
@@ -138,6 +170,7 @@ public class Animal : MonoBehaviour {
         animalState = AnimalState.WALKING;
         rb.isKinematic = true;
         myCollider.isTrigger = true;
+        alpha = false;
 
         if (currentPartner != null && currentPartner != _player)
         {
@@ -155,11 +188,12 @@ public class Animal : MonoBehaviour {
     {
         if(other.gameObject.tag == "Player")
         {
+            alpha = true;
             currentPartner = other.gameObject;
             int randomSex = Random.Range(0, 100);
             if(randomSex < 50)
             {
-                sexyTimer = sexyTimeTotal;
+                sexyTimer = climaxTotal;
                 animalState = AnimalState.SEXY;
 
                 tpc.isClimax = true;
@@ -171,7 +205,7 @@ public class Animal : MonoBehaviour {
             }
             else
             {
-                fightTimer = fightTimeTotal;
+                fightTimer = climaxTotal;
                 animalState = AnimalState.FIGHTING;
 
                 tpc.isClimax = true;
@@ -185,16 +219,24 @@ public class Animal : MonoBehaviour {
         else if(other.gameObject.tag == "Animal")
         {
             currentPartner = other.gameObject;
+            if(currentPartner.GetComponent<Animal>().climaxTotal > climaxTotal)
+            {
+                currentPartner.GetComponent<Animal>().alpha = true;
+            }
+            else
+            {
+                alpha = true;
+            }
             int randomSex = Random.Range(0, 100);
             if (randomSex < 50)
             {
-                sexyTimer = sexyTimeTotal;
+                sexyTimer = climaxTotal;
                 animalState = AnimalState.SEXY;
                 other.GetComponent<Animal>().animalState = AnimalState.SEXY;
             }
             else
             {
-                fightTimer = fightTimeTotal;
+                fightTimer = climaxTotal;
                 animalState = AnimalState.FIGHTING;
                 other.GetComponent<Animal>().animalState = AnimalState.FIGHTING;
             }

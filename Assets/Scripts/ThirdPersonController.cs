@@ -46,7 +46,7 @@ public class ThirdPersonController : MonoBehaviour
     List<Sprite> walkingSprites = new List<Sprite>(); // walking feet cursor
     int currentWalk = 0;
 
-    float climaxDelay;
+    float climaxDelay =0;
 
     void Start()
     {
@@ -243,7 +243,7 @@ public class ThirdPersonController : MonoBehaviour
         {
             climaxDelay += Time.deltaTime;
 
-            transform.RotateAround(currentPartner.transform.position, Vector3.up, 50 * Time.deltaTime );
+            //transform.RotateAround(currentPartner.transform.position, Vector3.up, 50 * Time.deltaTime );
 
             if((currentPartner.GetComponent<Animal>().animalState != Animal.AnimalState.SEXY 
                 && currentPartner.GetComponent<Animal>().animalState != Animal.AnimalState.FIGHTING) && climaxDelay > 1)

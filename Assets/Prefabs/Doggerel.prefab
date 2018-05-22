@@ -165,7 +165,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1686028390926910}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 22.2, y: 2.19, z: -10.271519}
+  m_LocalPosition: {x: -11.79, y: 2.19, z: -29.15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4665827684948224}
@@ -215,7 +215,7 @@ AudioSource:
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -373,11 +373,21 @@ MonoBehaviour:
   sex: {fileID: 1205338724090370}
   fight: {fileID: 1187057688324662}
   animalState: 0
+  alpha: 0
   moveRadius: 15
   moveSpeed: 5
   idleTimerTotal: 2
-  sexyTimeTotal: 5
-  fightTimeTotal: 3
+  climaxTotal: 5
+  sexy:
+  - {fileID: 8300000, guid: dd393628ae39f6442b2d7c7e1b48dbcc, type: 3}
+  - {fileID: 8300000, guid: 448a7b64d58372648b602df5361207e3, type: 3}
+  - {fileID: 8300000, guid: f149e8cf6b4033849825d32d62ba14da, type: 3}
+  - {fileID: 8300000, guid: ca2999695c421c141a92415ed9477e88, type: 3}
+  fighting:
+  - {fileID: 8300000, guid: ec07af2ee8307a348af0aa12a0ab4638, type: 3}
+  - {fileID: 8300000, guid: 357aa5999374fe34c8fe4a4aa89caaac, type: 3}
+  - {fileID: 8300000, guid: bb157aa73d81ed1468ae7aeb38473863, type: 3}
+  - {fileID: 8300000, guid: 82ecc36c5d995c54eb4f4a63a1488ba6, type: 3}
 --- !u!114 &114491263380755344
 MonoBehaviour:
   m_ObjectHideFlags: 1
