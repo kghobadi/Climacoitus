@@ -10,11 +10,12 @@ public class ThirdPersonController : MonoBehaviour
 {
     //Player movment variables. 
     CharacterController player;
+    public GameObject currentPartner;
     public float currentSpeed, walkSpeed, runSpeedMax;
     public float startingHeight, runTime;
     private Vector3 targetPosition;
     public bool isMoving, isClimax; // for point to click
-    public Animator charAnimator;
+    
     float clickTimer;
     public GameObject walkingPointer;
     //Camera ref variables
@@ -36,13 +37,16 @@ public class ThirdPersonController : MonoBehaviour
     public float listeningRadius;
     //store this mouse pos
     Vector3 lastPosition;
-    public SpriteRenderer animalRenderer;
+
+    public GameObject idle, walking, sex, fight;
 
     //UI walking
     Image symbol; // 2d sprite renderer icon reference
     AnimateUI symbolAnimator;
     List<Sprite> walkingSprites = new List<Sprite>(); // walking feet cursor
     int currentWalk = 0;
+
+    float climaxDelay =0;
 
     void Start()
     {
@@ -64,10 +68,14 @@ public class ThirdPersonController : MonoBehaviour
         //set starting points for most vars
         player = GetComponent<CharacterController>();
         targetPosition = transform.position;
-        charAnimator = GetComponentInChildren<Animator>();
-        charAnimator.SetBool("idle", true);
+
+        walking.SetActive(false);
+        sex.SetActive(false);
+        fight.SetActive(false);
+
         startingHeight = transform.position.y;
         currentSpeed = walkSpeed;
+
     }
 
     void Update()
@@ -156,23 +164,16 @@ public class ThirdPersonController : MonoBehaviour
                 }
             }
 
-            //Restart game
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                SceneManager.LoadScene("Menu");
-            }
-
-            
-
             //Check if we are moving and transition animation controller
             if (isMoving)
             {
 
                 MovePlayer();
-                charAnimator.SetBool("idle", false);
-                charAnimator.SetBool("dancing", false);
-                charAnimator.SetBool("touchingPlant", false);
-                
+                idle.SetActive(false);
+                sex.SetActive(false);
+                fight.SetActive(false);
+                walking.SetActive(true);
+
                 footStepTimer += Time.deltaTime;
                 
                 if (currentSpeed > 12)
@@ -195,8 +196,6 @@ public class ThirdPersonController : MonoBehaviour
                     //animate ui
                     walkingPointer.SetActive(false);
                     symbolAnimator.active = true;
-                    charAnimator.SetBool("running", true);
-                    charAnimator.SetBool("walking", false);
                 }
                 else
                 {
@@ -215,8 +214,6 @@ public class ThirdPersonController : MonoBehaviour
                         }
                         footStepTimer = 0;
                     }
-                    charAnimator.SetBool("walking", true);
-                    charAnimator.SetBool("running", false);
                 }
 
               
@@ -227,9 +224,11 @@ public class ThirdPersonController : MonoBehaviour
               
                 footStepTimer = 0;
                 walkingPointer.SetActive(false);
-                charAnimator.SetBool("walking", false);
-                charAnimator.SetBool("running", false);
-                
+
+                idle.SetActive(true);
+                sex.SetActive(false);
+                fight.SetActive(false);
+                walking.SetActive(false);
             }
 
             //if mouse has moved, refill list & reevaluate priorities
@@ -240,11 +239,29 @@ public class ThirdPersonController : MonoBehaviour
 
             lastPosition = transform.position;
         }
+        else
+        {
+            climaxDelay += Time.deltaTime;
+
+            //transform.RotateAround(currentPartner.transform.position, Vector3.up, 50 * Time.deltaTime );
+
+            if((currentPartner.GetComponent<Animal>().animalState != Animal.AnimalState.SEXY 
+                && currentPartner.GetComponent<Animal>().animalState != Animal.AnimalState.FIGHTING) && climaxDelay > 1)
+            {
+                isClimax = false;
+                idle.SetActive(true);
+                walking.SetActive(false);
+                sex.SetActive(false);
+                fight.SetActive(false);
+                climaxDelay = 0;
+            }
+        }
     }
    
     //Movement function which relies on vector3 movetowards. when we arrive at target, stop moving.
     void MovePlayer()
     {
+        
         //first calculate rotation and look
         targetPosition = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
 
@@ -252,11 +269,13 @@ public class ThirdPersonController : MonoBehaviour
 
         if(targetPosition.x < transform.position.x)
         {
-            animalRenderer.flipX = false;
+            idle.GetComponent<SpriteRenderer>().flipX = false;
+            walking.GetComponent<SpriteRenderer>().flipX = false;
         }
         else
         {
-            animalRenderer.flipX = true;
+            idle.GetComponent<SpriteRenderer>().flipX = true;
+            walking.GetComponent<SpriteRenderer>().flipX = true;
         }
 
         //this is a bit finnicky with char controller so may need to continuously set it 
@@ -279,6 +298,7 @@ public class ThirdPersonController : MonoBehaviour
         else
         {
             isMoving = false;
+           
         }
 
        
